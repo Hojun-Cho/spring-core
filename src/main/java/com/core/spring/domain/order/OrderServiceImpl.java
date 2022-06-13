@@ -2,11 +2,15 @@ package com.core.spring.domain.order;
 
 import com.core.spring.domain.member.Member;
 import com.core.spring.domain.member.MemberRepository;
-import com.core.spring.domain.member.MemoryMemberRepository;
 
 public class OrderServiceImpl implements OrderService{
-    private MemberRepository memberRepository = new MemoryMemberRepository();
-    private DiscountPolicy discountPolicy = new RateDiscountPolicy();
+    private final MemberRepository memberRepository;
+    private final DiscountPolicy discountPolicy ;
+
+    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
+        this.memberRepository = memberRepository;
+        this.discountPolicy = discountPolicy;
+    }
 
     @Override
     public Order createOrder(Long memberId, String itemName, int itemPrice) {

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ClientTest {
-    MemberService memberService = new MemberServiceImpl();
+    MemberService memberService = new MemberServiceImpl(new MemoryMemberRepository());
     @Test
     void 멤버_저장() {
         Member member = new Member(1L, "hojun", Grade.VIP);
