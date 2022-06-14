@@ -127,29 +127,51 @@ class ClassesLoader {
     }
 }
 ```
+
 * 위의 코드를 실행해서 현재 com.core에 해당하는 모든 클래스 정보를 얻어온다
 * 그리고 밑의 과정을 수행해서 함수들을 invoke하여 객체들을 받아온다
+
 ```java
 @Test
-    void 어노테이션에_해당하는_함수들을_모두_호출한다() {
-        List<Class<?>> classes = find("com.core");
-        List<Object> result = new ArrayList<>();
-        
-        classes.stream().forEach(aClass -> {
-            try {
-                Object object = aClass.getDeclaredConstructor().newInstance();
-                if (aClass.getDeclaredAnnotationsByType(AnnotationTest.class).length != 0)
-                    Arrays.stream(aClass.getDeclaredMethods()).filter(method -> method.getParameterCount() == 0 &&
-                                    method.getDeclaredAnnotationsByType(CustomBean.class) != null)
-                            .forEach(method -> {
-                                System.out.println("====" + object + "====");
-                                try {
-                                    result.add(method.invoke(object));
-                                } catch (IllegalAccessException | InvocationTargetException e) {
-                                }
-                            });
-            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            }
+    void 어노테이션에_해당하는_함수들을_모두_호출한다(){
+            List<Class<?>>classes=find("com.core");
+        List<Object> result=new ArrayList<>();
+
+        classes.stream().forEach(aClass->{
+        try{
+        Object object=aClass.getDeclaredConstructor().newInstance();
+        if(aClass.getDeclaredAnnotationsByType(AnnotationTest.class).length!=0)
+        Arrays.stream(aClass.getDeclaredMethods()).filter(method->method.getParameterCount()==0&&
+        method.getDeclaredAnnotationsByType(CustomBean.class)!=null)
+        .forEach(method->{
+        System.out.println("===="+object+"====");
+        try{
+        result.add(method.invoke(object));
+        }catch(IllegalAccessException|InvocationTargetException e){
+        }
         });
-    }
+        }catch(InstantiationException|IllegalAccessException|NoSuchMethodException|InvocationTargetException e){
+        }
+        });
+        }
 ```
+
+###  테스트
+
+```java
+    @Test
+    void runMyContainer(){
+            InstanceContainer container=new InstanceContainer(Core.makeInstance(AllClassesLoader.find("com.core")));
+
+            assertThrows(NoSuchBeanDefinitionException.class,
+        ()->container.getInstance("NOT_EXIST_METHOD"));
+
+        assertTrue(container.getInstance("hello")instanceof String);
+
+        }
+```
+### bean으로 등록된 클래스를 상속받아서 클래스를 만든다
+1. 일단 해당 클래스 상속부터 받아보자 
+### 궁금한거 
+1. 만약 애플리케이션 로딩과 동시에 내가 만든 컨테이너가 실행되면 이는 싱글톤이 보장된다
+    *. 만약 멀티 스레드 요청이 들어와도 동일 인스턴스를 리턴해서!! 

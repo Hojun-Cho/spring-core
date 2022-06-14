@@ -6,11 +6,8 @@ import com.core.spring.CustomBean;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import static com.core.spring.customDI.AllClassesLoader.find;
-
 public class Core {
-    public static Map<String, Object> makeInstance() {
-        List<Class<?>> classes = find("com.core");
+    public static Map<String, Object> makeInstance(List<Class<?>> classes) {
         Map<String, Object> instances = new HashMap<>();
 
         classes.stream().forEach(aClass -> {
@@ -20,7 +17,7 @@ public class Core {
                     Arrays.stream(aClass.getDeclaredMethods()).filter(method -> method.getParameterCount() == 0 &&
                                     method.getDeclaredAnnotationsByType(CustomBean.class) != null)
                             .forEach(method -> {
-                                System.out.println("====" + object + "====");
+                                System.out.println("make ====" + object.getClass() + " >> "+ method.getName() + "==== make");
                                 try {
                                     instances.put(method.getName(), method.invoke(object));
                                 } catch (IllegalAccessException | InvocationTargetException e) {
