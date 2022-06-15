@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 
 public class BeanTest {
-//    private ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+//    private ApplicationContext context = new AnnotationConfigApplicationContext(TestConfig.class);
 
 
     @Test

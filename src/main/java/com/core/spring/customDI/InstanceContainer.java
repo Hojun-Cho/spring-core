@@ -22,4 +22,7 @@ public class InstanceContainer {
     public void add(String name, Object object) {
         this.instances.put(name,object);
     }
+    public Map<String,Object> getInstances(){
+        return instances;
+    }
 }

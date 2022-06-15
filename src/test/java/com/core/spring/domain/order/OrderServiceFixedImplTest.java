@@ -1,6 +1,6 @@
 //package com.core.spring.domain.order;
 //
-//import com.core.spring.domain.AppConfig;
+//import com.core.spring.domain.TestConfig;
 //import com.core.spring.domain.member.Grade;
 //import com.core.spring.domain.member.Member;
 //import com.core.spring.domain.member.MemberRepository;
@@ -9,8 +9,8 @@
 //import static org.junit.jupiter.api.Assertions.assertEquals;
 //
 //public class OrderServiceFixedImplTest {
-//    private MemberRepository memberRepository = new AppConfig().memberRepository();
-//    private OrderService orderService = new AppConfig().orderService();
+//    private MemberRepository memberRepository = new TestConfig().memberRepository();
+//    private OrderService orderService = new TestConfig().orderService();
 //
 //    @Test
 //    void 주문_고정() {

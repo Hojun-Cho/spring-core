@@ -202,7 +202,8 @@ class ClassesLoader {
 ### 이렇게 해당 인스턴스가 존재하지 않는다면 새로 만들고 컨테이너에 넣어준다
 1. https://nhj12311.tistory.com/469
 ### 다음 문제는 이 클래스를 어떻게 원본 클래스와 바꿀건지 !
-
+### configuration의 작동 방식
+1. ClassLoader 클래스의 loadClass()로 target class를 읽어들인다
 
 ### 궁금한거 
 1. 만약 애플리케이션 로딩과 동시에 내가 만든 컨테이너가 실행되면 이는 싱글톤이 보장된다
