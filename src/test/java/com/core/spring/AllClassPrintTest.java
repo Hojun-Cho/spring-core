@@ -1,9 +1,9 @@
 package com.core.spring;
 
 import com.core.spring.customDI.InstanceContainer;
+import com.core.spring.domain.member.MemberRepository;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
@@ -11,7 +11,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.core.spring.customDI.AllClassesLoader.find;
 import static com.core.spring.customDI.Core.makeInstance;
@@ -62,41 +61,43 @@ public class AllClassPrintTest {
     }
 
     @Test
-    void cglib() {
+    void cglib() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         List<Class<?>> classes = find("com.core");
         Map<String, Object> cglibClasses = new HashMap<>();
-        for (Class<?> c : classes) {
-            if (c.getDeclaredAnnotationsByType(MyConfiguration.class).length != 0)
-                System.out.println("hah");
-        }
         List<Class<?>> classList = classes.stream()
                 .filter(aClass -> aClass.getDeclaredAnnotationsByType(MyConfiguration.class).length != 0)
                 .collect(Collectors.toList());
 
         classList.stream()
                 .forEach(nowClass -> {
+                    System.out.println(nowClass.getName());
                     Enhancer enhancer = new Enhancer();
                     enhancer.setSuperclass(nowClass);
                     enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> proxy.invokeSuper(obj, args));
                     cglibClasses.put(nowClass.getSimpleName(), enhancer.create());
                 });
 
-        for (String key : cglibClasses.keySet()){
-            Arrays.stream(cglibClasses.get(key).getClass().getDeclaredMethods())
-                    .forEach(method -> System.out.println(method.getName()));
+        for (String key : cglibClasses.keySet()) {
+            System.out.println("====================");
+            Object target = cglibClasses.get(key);
+            target = (TestConfig) target;
+            System.out.println(target.getClass());
+            Method memberRepository = target.getClass().getMethod("memberRepository");
+            MemberRepository repository = (MemberRepository) memberRepository.invoke(target);
         }
-        cglibClasses.keySet()
-                .forEach(key ->
-                        Arrays.stream(cglibClasses.get(key).getClass().getDeclaredMethods())
-                                .filter(method -> method.getDeclaredAnnotationsByType(CustomBean.class).length != 0)
-                                .forEach(method -> {
-                                    System.out.println(method.getName());
-                                    try {
-                                        containers.put(method.getName(), method.invoke(cglibClasses.get(key)));
-                                    } catch (IllegalAccessException | InvocationTargetException e) {
-                                        e.printStackTrace();
-                                    }
-                                }));
+
+//        cglibClasses.keySet()
+//                .forEach(key ->
+//                        Arrays.stream(cglibClasses.get(key).getClass().getDeclaredMethods())
+//                                .filter(method -> method.getDeclaredAnnotationsByType(CustomBean.class).length != 0)
+//                                .forEach(method -> {
+//                                    System.out.println(method.getName());
+//                                    try {
+//                                        containers.put(method.getName(), method.invoke(cglibClasses.get(key)));
+//                                    } catch (IllegalAccessException | InvocationTargetException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }));
 
 
     }
