@@ -1,10 +1,11 @@
 package com.core.spring;
 
-@AnnotationTest
+@MyConfiguration
 public class TestConfig {
 
     @CustomBean
     public String hello(){
+        System.out.println("=====================================================");
         return "hello";
     }
     @CustomBean

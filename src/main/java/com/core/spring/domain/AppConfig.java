@@ -1,6 +1,6 @@
 package com.core.spring.domain;
 
-import com.core.spring.AnnotationTest;
+import com.core.spring.MyConfiguration;
 import com.core.spring.CustomBean;
 import com.core.spring.SingletonProblem;
 import com.core.spring.domain.member.MemberRepository;
@@ -12,7 +12,7 @@ import com.core.spring.domain.order.OrderServiceImpl;
 import com.core.spring.domain.order.RateDiscountPolicy;
 import org.springframework.context.annotation.Bean;
 
-@AnnotationTest
+@MyConfiguration
 public class AppConfig {
 
     @Bean

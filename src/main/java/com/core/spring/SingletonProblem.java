@@ -1,6 +1,6 @@
 package com.core.spring;
 
-@AnnotationTest
+@MyConfiguration
 public class SingletonProblem {
     private  int  price;
 

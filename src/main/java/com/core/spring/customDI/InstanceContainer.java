@@ -15,4 +15,11 @@ public class InstanceContainer {
             return instances.get(methodName);
         throw new NoSuchBeanDefinitionException(methodName +"는 존재하지 않는 bean입니다");
     }
+    public boolean isExist(String methodName){
+        return instances.containsKey(methodName);
+    }
+
+    public void add(String name, Object object) {
+        this.instances.put(name,object);
+    }
 }

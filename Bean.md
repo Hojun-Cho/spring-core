@@ -172,6 +172,38 @@ class ClassesLoader {
 ```
 ### bean으로 등록된 클래스를 상속받아서 클래스를 만든다
 1. 일단 해당 클래스 상속부터 받아보자 
+   1. cglib이 필요하다
+      1. target이 된 class를 상속받아야한다
+   2. Enhancer => Generates dynamic subclasses to enable method interception. 동적 서브 클래스를 생성한다
+2. 
+```java
+ @Test
+    void cglib() {
+        InstanceContainer container = new InstanceContainer(Core.makeInstance(find("com.core")));
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(TestConfig.class);
+        enhancer.setCallback(new MethodInterceptor() {
+            @Override
+            public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+                if(!container.isExist(method.getName())) {
+                    System.out.println("not exits >> " + method.getName() );
+                    container.add(method.getName() ,proxy.invokeSuper(obj,args));
+                }
+                return container.getInstance(method.getName());
+            }
+        });
+        TestConfig testConfig = (TestConfig) enhancer.create();
+        System.out.println(testConfig.hello());
+        System.out.println(testConfig.world());
+
+        System.out.println(new TestConfig().hello());
+    }
+```
+### 이렇게 해당 인스턴스가 존재하지 않는다면 새로 만들고 컨테이너에 넣어준다
+1. https://nhj12311.tistory.com/469
+### 다음 문제는 이 클래스를 어떻게 원본 클래스와 바꿀건지 !
+
+
 ### 궁금한거 
 1. 만약 애플리케이션 로딩과 동시에 내가 만든 컨테이너가 실행되면 이는 싱글톤이 보장된다
     *. 만약 멀티 스레드 요청이 들어와도 동일 인스턴스를 리턴해서!! 
