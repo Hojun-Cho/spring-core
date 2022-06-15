@@ -2,8 +2,7 @@ package com.core.spring;
 
 import com.core.spring.customDI.InstanceContainer;
 import com.core.spring.domain.member.MemberRepository;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
@@ -18,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AllClassPrintTest {
     private InstanceContainer container;
-    public static Map<String, Object> containers = new HashMap<>();
 
 //    @BeforeEach
 //    void init() {
@@ -67,39 +65,31 @@ public class AllClassPrintTest {
         List<Class<?>> classList = classes.stream()
                 .filter(aClass -> aClass.getDeclaredAnnotationsByType(MyConfiguration.class).length != 0)
                 .collect(Collectors.toList());
-
+        Map<String, Object> containers = new HashMap<>();
         classList.stream()
                 .forEach(nowClass -> {
-                    System.out.println(nowClass.getName());
+                    System.out.println(nowClass.getSimpleName());
                     Enhancer enhancer = new Enhancer();
                     enhancer.setSuperclass(nowClass);
-                    enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> proxy.invokeSuper(obj, args));
+                    enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
+                        System.out.println("============im in ====================");
+                        if (!containers.containsKey(method.getName())) {
+                            System.out.println("&&&&&&&&&&&&&&&&& in container " + containers);
+                            containers.put(method.getName(), proxy.invokeSuper(obj, args));
+                        }
+                        System.out.println("============im out ====================");
+                        return containers.get(method.getName());
+                    });
                     cglibClasses.put(nowClass.getSimpleName(), enhancer.create());
                 });
-
-        for (String key : cglibClasses.keySet()) {
-            System.out.println("====================");
-            Object target = cglibClasses.get(key);
-            target = (TestConfig) target;
-            System.out.println(target.getClass());
-            Method memberRepository = target.getClass().getMethod("memberRepository");
-            MemberRepository repository = (MemberRepository) memberRepository.invoke(target);
-        }
-
-//        cglibClasses.keySet()
-//                .forEach(key ->
-//                        Arrays.stream(cglibClasses.get(key).getClass().getDeclaredMethods())
-//                                .filter(method -> method.getDeclaredAnnotationsByType(CustomBean.class).length != 0)
-//                                .forEach(method -> {
-//                                    System.out.println(method.getName());
-//                                    try {
-//                                        containers.put(method.getName(), method.invoke(cglibClasses.get(key)));
-//                                    } catch (IllegalAccessException | InvocationTargetException e) {
-//                                        e.printStackTrace();
-//                                    }
-//                                }));
-
-
+        Method target = Arrays.stream(cglibClasses.get("TestConfig").getClass().getDeclaredMethods())
+                .filter(method -> method.getName().contains("CGLIB") && method.getName().contains("memberRepository"))
+                .findFirst()
+                .get();
+        System.out.println(target.getName());
+        MemberRepository memberRepository1 = (MemberRepository) target.invoke(cglibClasses.get("TestConfig"));
+        MemberRepository memberRepository2 = (MemberRepository) target.invoke(cglibClasses.get("TestConfig"));
+        System.out.println(memberRepository1 + " --- " + memberRepository2);
     }
 
 
