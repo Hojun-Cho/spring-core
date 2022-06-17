@@ -1,5 +1,6 @@
 package com.core.spring;
 
+import com.core.spring.customDI.Core;
 import com.core.spring.customDI.InstanceContainer;
 import com.core.spring.domain.member.MemberRepository;
 import com.core.spring.domain.order.OrderService;
@@ -14,7 +15,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.core.spring.customDI.AllClassesLoader.find;
-import static com.core.spring.customDI.Core.makeInstance;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AllClassPrintTest {
@@ -25,15 +25,7 @@ public class AllClassPrintTest {
 //        container = new InstanceContainer(makeInstance(find("com.core")));
 //    }
 
-    @Test
-    void runMyContainer() {
-        InstanceContainer container = new InstanceContainer(makeInstance(find("com.core")));
 
-        assertThrows(NoSuchBeanDefinitionException.class,
-                () -> container.getInstance("NOTEXISTMETHOD"));
-
-        assertTrue(container.getInstance("hello") instanceof String);
-    }
 
     @Test
     void classExtends() {
@@ -67,7 +59,17 @@ public class AllClassPrintTest {
                 .filter(aClass -> aClass.getDeclaredAnnotationsByType(MyConfiguration.class).length != 0)
                 .collect(Collectors.toList());
         classList.stream()
-                .forEach(this::enhancerTest);
+                .forEach(nowClass->{
+                    Enhancer enhancer = new Enhancer();
+                    enhancer.setSuperclass(nowClass);
+                    enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
+                        System.out.println(method.getName() + "  " + obj.getClass() + "=====" + method.getDeclaringClass());
+                        if (!containers.containsKey(method.getName()))
+                            containers.put(method.getName(), proxy.invokeSuper(obj, args));
+                        return containers.get(method.getName());
+                    });
+                    cglibClasses.put(nowClass.getSimpleName(), enhancer.create());
+                });
 
         Object targetObject = cglibClasses.get("TestConfig");
 
@@ -87,17 +89,12 @@ public class AllClassPrintTest {
 
     }
 
-    private void enhancerTest(Class<?> nowClass) {
-        Enhancer enhancer = new Enhancer();
-        enhancer.setSuperclass(nowClass);
-        enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
-            System.out.println(method.getName() + "  " + obj.getClass() + "=====" + method.getDeclaringClass());
-            if (!containers.containsKey(method.getName()))
-                containers.put(method.getName(), proxy.invokeSuper(obj, args));
-            return containers.get(method.getName());
-        });
-        cglibClasses.put(nowClass.getSimpleName(), enhancer.create());
+    @Test
+    void CoreTest(){
+        Core core = new Core(find("com.core"));
     }
+
+
 
 
 }

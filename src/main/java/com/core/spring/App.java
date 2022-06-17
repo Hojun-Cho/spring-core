@@ -1,6 +1,5 @@
 package com.core.spring;
 
-import com.core.spring.customDI.Core;
 import com.core.spring.customDI.InstanceContainer;
 import com.core.spring.domain.AppConfig;
 import com.core.spring.domain.member.MemberRepository;
@@ -16,8 +15,8 @@ import static com.core.spring.customDI.AllClassesLoader.find;
 
 public class App {
 
-    public static void main(String[] args) {
-      InstanceContainer container =  new   InstanceContainer(Core.makeInstance(find("com.core")));
-      Map result= container.getInstances();
-    }
+//    public static void main(String[] args) {
+//      InstanceContainer container =  new   InstanceContainer(Core.makeInstance(find("com.core")));
+//      Map result= container.getInstances();
+//    }
 }
