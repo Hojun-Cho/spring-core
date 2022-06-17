@@ -2,6 +2,8 @@ package com.core.spring;
 
 import com.core.spring.customDI.InstanceContainer;
 import com.core.spring.domain.member.MemberRepository;
+import com.core.spring.domain.order.OrderService;
+import com.core.spring.domain.order.OrderServiceImpl;
 import net.sf.cglib.proxy.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -16,8 +18,8 @@ import static com.core.spring.customDI.Core.makeInstance;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AllClassPrintTest {
-    private InstanceContainer container;
-
+    Map<String, Object> cglibClasses = new HashMap<>();
+    Map<String, Object> containers = new HashMap<>();
 //    @BeforeEach
 //    void init() {
 //        container = new InstanceContainer(makeInstance(find("com.core")));
@@ -61,35 +63,40 @@ public class AllClassPrintTest {
     @Test
     void cglib() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         List<Class<?>> classes = find("com.core");
-        Map<String, Object> cglibClasses = new HashMap<>();
         List<Class<?>> classList = classes.stream()
                 .filter(aClass -> aClass.getDeclaredAnnotationsByType(MyConfiguration.class).length != 0)
                 .collect(Collectors.toList());
-        Map<String, Object> containers = new HashMap<>();
         classList.stream()
-                .forEach(nowClass -> {
-                    System.out.println(nowClass.getSimpleName());
-                    Enhancer enhancer = new Enhancer();
-                    enhancer.setSuperclass(nowClass);
-                    enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
-                        System.out.println("============im in ====================");
-                        if (!containers.containsKey(method.getName())) {
-                            System.out.println("&&&&&&&&&&&&&&&&& in container " + containers);
-                            containers.put(method.getName(), proxy.invokeSuper(obj, args));
-                        }
-                        System.out.println("============im out ====================");
-                        return containers.get(method.getName());
-                    });
-                    cglibClasses.put(nowClass.getSimpleName(), enhancer.create());
-                });
-        Method target = Arrays.stream(cglibClasses.get("TestConfig").getClass().getDeclaredMethods())
-                .filter(method -> method.getName().contains("CGLIB") && method.getName().contains("memberRepository"))
-                .findFirst()
-                .get();
-        System.out.println(target.getName());
-        MemberRepository memberRepository1 = (MemberRepository) target.invoke(cglibClasses.get("TestConfig"));
-        MemberRepository memberRepository2 = (MemberRepository) target.invoke(cglibClasses.get("TestConfig"));
-        System.out.println(memberRepository1 + " --- " + memberRepository2);
+                .forEach(this::enhancerTest);
+
+        Object targetObject = cglibClasses.get("TestConfig");
+
+        TestConfig myConfig = (TestConfig) targetObject;
+
+        MemberRepository memberRepository1 = myConfig.memberRepository();
+        MemberRepository memberRepository2 = myConfig.memberRepository();
+
+        assertEquals(memberRepository1,memberRepository2);
+
+        OrderServiceImpl orderService1 =(OrderServiceImpl) myConfig.orderService();
+        OrderServiceImpl orderService2 =(OrderServiceImpl) myConfig.orderService();
+
+        assertEquals(orderService1,orderService2);
+        assertEquals(orderService1.getDiscountPolicy(),orderService2.getDiscountPolicy());
+        assertEquals(orderService1.getMemberRepository(),orderService2.getMemberRepository());
+
+    }
+
+    private void enhancerTest(Class<?> nowClass) {
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(nowClass);
+        enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
+            System.out.println(method.getName() + "  " + obj.getClass() + "=====" + method.getDeclaringClass());
+            if (!containers.containsKey(method.getName()))
+                containers.put(method.getName(), proxy.invokeSuper(obj, args));
+            return containers.get(method.getName());
+        });
+        cglibClasses.put(nowClass.getSimpleName(), enhancer.create());
     }
 
 

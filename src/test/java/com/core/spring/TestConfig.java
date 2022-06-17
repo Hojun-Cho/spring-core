@@ -13,7 +13,6 @@ public class TestConfig {
 
     @CustomBean
     public MemberRepository memberRepository(){
-        System.out.println("hello world");
         return new MemoryMemberRepository();
     }
     @CustomBean
