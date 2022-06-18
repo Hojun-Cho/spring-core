@@ -1,11 +1,11 @@
-package com.core.spring.customDI;
+package com.core.spring.classLoader;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AllClassesLoader {
+public class Loader {
 
     private static final char PKG_SEPARATOR = '.';
 

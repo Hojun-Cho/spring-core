@@ -1,4 +1,4 @@
-package com.core.spring.customDI;
+package com.core.spring.beans;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 
