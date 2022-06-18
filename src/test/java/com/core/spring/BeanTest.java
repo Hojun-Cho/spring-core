@@ -1,14 +1,11 @@
 package com.core.spring;
 
 import com.core.spring.domain.AppConfig;
-import com.core.spring.domain.member.Grade;
-import com.core.spring.domain.member.MemberRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 

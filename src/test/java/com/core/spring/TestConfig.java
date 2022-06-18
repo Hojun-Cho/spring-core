@@ -29,9 +29,6 @@ public class TestConfig {
         return new OrderServiceImpl(memberRepository()
                 , new RateDiscountPolicy());
     }
-    @CustomBean
-    public SingletonProblem singletonProblem(){
-        return new SingletonProblem();
-    }
+
 }
 

@@ -2,7 +2,6 @@ package com.core.spring.domain;
 
 import com.core.spring.beans.MyConfiguration;
 import com.core.spring.beans.CustomBean;
-import com.core.spring.SingletonProblem;
 import com.core.spring.domain.member.MemberRepository;
 import com.core.spring.domain.member.MemberService;
 import com.core.spring.domain.member.MemberServiceImpl;
@@ -29,8 +28,5 @@ public class AppConfig {
         return new OrderServiceImpl(memberRepository()
                 , new RateDiscountPolicy());
     }
-    @CustomBean
-    public SingletonProblem singletonProblem(){
-        return new SingletonProblem();
-    }
+
 }

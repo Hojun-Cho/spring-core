@@ -1,6 +1,5 @@
 package com.core.spring.domain.order;
 
-import com.core.spring.domain.member.Member;
 import com.core.spring.domain.member.MemberRepository;
 
 public class OrderServiceImpl implements OrderService{
@@ -20,11 +19,5 @@ public class OrderServiceImpl implements OrderService{
         return discountPolicy;
     }
 
-    @Override
-    public Order createOrder(Long memberId, String itemName, int itemPrice) {
-        Member member = memberRepository.findById(memberId);
-        int discount = discountPolicy.discount(member, itemPrice);
 
-        return new Order(memberId,itemName,itemPrice,discount);
-    }
 }
