@@ -4,12 +4,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-public class CustomContext {
+public class BeanContext implements Context {
 
     private final Map<String, Method> methodMap;
     private final Object clazz;
 
-    public CustomContext(Object clazz, Map<String, Method> methodMap) {
+    public BeanContext(Object clazz, Map<String, Method> methodMap) {
         this.clazz = clazz;
         this.methodMap = methodMap;
     }

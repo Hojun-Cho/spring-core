@@ -25,6 +25,7 @@ public class ComponentFactory implements Factory {
                 .filter(aClass -> aClass.getDeclaredAnnotation(MyComponentScan.class) != null &&
                         packageNames.stream().allMatch(name->
                                 !name.contains(aClass.getDeclaredAnnotation(MyComponentScan.class).value())))
+                .parallel()
                 .forEach(aClass -> {
                     String packageName = aClass.getDeclaredAnnotation(MyComponentScan.class).value();
                     packageNames.add(packageName);
@@ -48,10 +49,11 @@ public class ComponentFactory implements Factory {
 
 
     @Override
-    public CustomContext getContext(Class<?> targetClass) {
+    public BeanContext getContext(Class<?> targetClass) {
         Map<String, Object> cglibObject = new HashMap<>();
         Map<String, Object> originalClass = new HashMap<>();
-        packageToComponentClasses.keySet().stream()
+        packageToComponentClasses.keySet()
+                .parallelStream()
                 .filter(key -> key.startsWith(targetClass.getSimpleName() + PATTERN))
                 .map(key -> key.split("\\*\\*")[1])
                 .forEach(key -> {

@@ -2,7 +2,7 @@ package com.core.spring;
 
 import com.core.spring.beans.BeanFactory;
 import com.core.spring.beans.CustomBean;
-import com.core.spring.beans.CustomContext;
+import com.core.spring.beans.BeanContext;
 import com.core.spring.beans.MyConfiguration;
 import com.core.spring.domain.member.MemberRepository;
 import com.core.spring.domain.member.MemberService;
@@ -92,7 +92,7 @@ public class AllClassPrintTest {
     @Test
     void CoreTest() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         BeanFactory beanFactory = new BeanFactory(find("com.core"));
-        CustomContext context =  beanFactory.getContext(TestConfig.class);
+        BeanContext context =  beanFactory.getContext(TestConfig.class);
         assertTrue(context.getBean( "memberRepository") != null);
         assertEquals(context.getBean("memberRepository"), context.getBean( "memberRepository"));
         assertEquals(context.getBean( "memberService"),
@@ -103,7 +103,7 @@ public class AllClassPrintTest {
 
     @Test
     void getContext() {
-        CustomContext context = new BeanFactory(find("com.core")).getContext(TestConfig.class);
+        BeanContext context = new BeanFactory(find("com.core")).getContext(TestConfig.class);
 
         assertTrue(context != null);
         assertTrue(context.getBean("memberRepository") != null);

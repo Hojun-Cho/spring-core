@@ -29,14 +29,14 @@ public class BeanFactory implements Factory {
         init();
     }
 
-    public CustomContext getContext(Class<?> targetClass) {
+    public BeanContext getContext(Class<?> targetClass) {
         Map<String,Method> contextMethodMap = new HashMap<>();
         Arrays.stream(original.get(targetClass.getSimpleName())
                         .getDeclaredMethods())
                 .forEach(method ->
                         contextMethodMap.put(method.getName(),methods.get(method.getName())));
 
-        return new CustomContext(cglibClass.get(targetClass.getSimpleName()),Collections.unmodifiableMap(contextMethodMap));
+        return new BeanContext(cglibClass.get(targetClass.getSimpleName()),Collections.unmodifiableMap(contextMethodMap));
     }
 
     private void init() {
