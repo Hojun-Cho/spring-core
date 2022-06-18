@@ -1,7 +1,7 @@
 package com.core.spring.customDI;
 
 import com.core.spring.MyConfiguration;
-import com.core.spring.domain.member.Member;
+
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -11,21 +11,23 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Core {
-    private final Map<String, Object> cglibClasses = new ConcurrentHashMap<>();
-    private final Map<String, Object> containers = new ConcurrentHashMap<>();
-    private final Map<String,Object> original = new HashMap<>();
+    private  Map<String, Object> cglibClasses = new ConcurrentHashMap<>();
+    private  Map<String, Object> enhancers = new ConcurrentHashMap<>();
+    private  Map<String, Class> original = new HashMap<>();
+    private  Map<String, Method> methods = new ConcurrentHashMap<>();
+
     public Core(List<Class<?>> classes) {
         classes.stream().parallel()
                 .filter(aClass -> aClass.getDeclaredAnnotationsByType(MyConfiguration.class).length != 0)
                 .forEach(nowClass -> {
-                    original.put(nowClass.getSimpleName(),nowClass);
+                    original.put(nowClass.getSimpleName(), nowClass);
                     System.out.println(nowClass.getSimpleName() + "  confirm");
                     Enhancer enhancer = new Enhancer();
                     enhancer.setSuperclass(nowClass);
                     enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
-                        if (!containers.containsKey(method.getName()))
-                            containers.put(method.getName(), proxy.invokeSuper(obj, args));
-                        return containers.get(method.getName());
+                        if (!enhancers.containsKey(method.getName()))
+                            enhancers.put(method.getName(), proxy.invokeSuper(obj, args));
+                        return enhancers.get(method.getName());
                     });
                     cglibClasses.put(nowClass.getSimpleName(), enhancer.create());
                 });
@@ -33,29 +35,25 @@ public class Core {
     }
 
     public void init() {
-        cglibClasses.keySet().stream()
-                .forEach(key -> {
-                    Object object = cglibClasses.get(key);
-                    Arrays.stream(object.getClass().getDeclaredMethods())
-                            .forEach(method -> {
-                                System.out.println(method.getDeclaringClass()+"  " + object.getClass().getSimpleName());
-                                if (method.getDeclaringClass().getName().equals(object.getClass().getName())) {
-                                    try {
-                                        containers.put(method.getName(), method.invoke(original.get(object.getClass().getSimpleName())));
-                                    } catch (IllegalAccessException | InvocationTargetException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-                });
+        original.keySet()
+                .forEach(key -> Arrays.stream(original.get(key).getDeclaredMethods())
+                        .forEach(method -> methods.put(method.getName(), getEnhancerMethod(key, method.getName()))
+                        ));
     }
 
-    public Object getCustomBean(Class aclass, String methodName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        if (containers.containsKey(aclass.getSimpleName())) {
-            Class<?> object = containers.get(aclass.getSimpleName()).getClass();
-            Method method = object.getDeclaredMethod(methodName);
-            return method.invoke(object);
-        }
-        throw new NoSuchMethodException(aclass.getSimpleName() + " no such class");
+    private Method getEnhancerMethod(String key, String targetMethod) {
+        System.out.println(key + "============" + targetMethod);
+         Method result= Arrays.stream(cglibClasses.get(key).getClass().getDeclaredMethods())
+                .parallel()
+                .filter(method -> method.getName().contains(targetMethod) && method.getName().length() == targetMethod.length())
+                .findFirst().get();
+         result.setAccessible(true);
+         return result;
     }
+
+    public Object getCustomBean(Class declareClass ,String methodName) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        return methods.get(methodName).invoke(cglibClasses.get(declareClass.getSimpleName()));
+    }
+
 }
+

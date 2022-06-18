@@ -3,6 +3,8 @@ package com.core.spring;
 import com.core.spring.customDI.Core;
 import com.core.spring.customDI.InstanceContainer;
 import com.core.spring.domain.member.MemberRepository;
+import com.core.spring.domain.member.MemberService;
+import com.core.spring.domain.member.MemberServiceImpl;
 import com.core.spring.domain.order.OrderService;
 import com.core.spring.domain.order.OrderServiceImpl;
 import net.sf.cglib.proxy.*;
@@ -90,8 +92,16 @@ public class AllClassPrintTest {
     }
 
     @Test
-    void CoreTest(){
+    void CoreTest() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Core core = new Core(find("com.core"));
+        assertTrue(core.getCustomBean(TestConfig.class,"memberRepository")!=null);
+        assertEquals(core.getCustomBean(TestConfig.class,"memberRepository"),core.getCustomBean(TestConfig.class,"memberRepository"));
+        assertEquals(core.getCustomBean(TestConfig.class,"memberService"),
+                core.getCustomBean(TestConfig.class,"memberService"));
+        assertEquals(((MemberServiceImpl)core.getCustomBean(TestConfig.class,"memberService")).getMemberRepository(),
+                ((MemberServiceImpl)core.getCustomBean(TestConfig.class,"memberService")).getMemberRepository());
+
+
     }
 
 
