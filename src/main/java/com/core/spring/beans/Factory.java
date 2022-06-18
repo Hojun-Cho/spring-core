@@ -2,7 +2,6 @@ package com.core.spring.beans;
 
 import com.core.spring.MyConfiguration;
 
-import com.core.spring.TestConfig;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -10,7 +9,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class Factory {
     private final Map<String, Object> cglibClass = new ConcurrentHashMap<>();
@@ -35,7 +33,7 @@ public class Factory {
         init();
     }
 
-    public CustomContext getContext(Class<TestConfig> targetClass) {
+    public CustomContext getContext(Class<?> targetClass) {
         Map<String,Method> contextMethodMap = new HashMap<>();
         Arrays.stream(original.get(targetClass.getSimpleName())
                         .getDeclaredMethods())
@@ -45,16 +43,16 @@ public class Factory {
         return new CustomContext(cglibClass.get(targetClass.getSimpleName()),Collections.unmodifiableMap(contextMethodMap));
     }
 
-
     public void init() {
         original.keySet()
                 .forEach(key -> Arrays.stream(original.get(key).getDeclaredMethods())
-                        .forEach(method -> methods.put(method.getName(), getCglibMethod(key, method.getName()))
+                        .parallel()
+                        .forEach(method ->
+                                methods.put(method.getName(), getMethodDontCareOrder(key, method.getName()))
                         ));
     }
 
-
-    private Method getCglibMethod(String key, String targetMethod) {
+    private Method getMethodDontCareOrder(String key, String targetMethod) {
         Method result = Arrays.stream(cglibClass.get(key).getClass().getDeclaredMethods())
                 .parallel()
                 .filter(method -> method.getName().equals(targetMethod))

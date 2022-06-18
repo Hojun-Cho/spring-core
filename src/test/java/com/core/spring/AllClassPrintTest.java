@@ -109,7 +109,15 @@ public class AllClassPrintTest {
         assertSame(context.getBean("memberService"), context.getBean("memberService"));
         assertSame(((MemberService)context.getBean("memberService")).getMemberRepository(),
                 ((MemberRepository)((MemberService) context.getBean("memberService")).getMemberRepository()));
-
+    }
+    /*
+        use parallel in forEach Methods
+        none parallel  239 ms
+        parallel 238   ms
+     */
+    @Test
+    void parallelTest(){
+         new Factory(find("com.core")).getContext(TestConfig.class);
     }
 
 
