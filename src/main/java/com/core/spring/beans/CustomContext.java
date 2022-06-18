@@ -1,7 +1,5 @@
 package com.core.spring.beans;
 
-import com.core.spring.TestConfig;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;

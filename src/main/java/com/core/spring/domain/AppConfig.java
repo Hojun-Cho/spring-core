@@ -1,7 +1,7 @@
 package com.core.spring.domain;
 
-import com.core.spring.MyConfiguration;
-import com.core.spring.CustomBean;
+import com.core.spring.beans.MyConfiguration;
+import com.core.spring.beans.CustomBean;
 import com.core.spring.SingletonProblem;
 import com.core.spring.domain.member.MemberRepository;
 import com.core.spring.domain.member.MemberService;

@@ -1,5 +1,8 @@
 package com.core.spring;
 
+import com.core.spring.beans.CustomBean;
+import com.core.spring.beans.MyComponentScan;
+import com.core.spring.beans.MyConfiguration;
 import com.core.spring.domain.member.MemberRepository;
 import com.core.spring.domain.member.MemberService;
 import com.core.spring.domain.member.MemberServiceImpl;
@@ -8,6 +11,7 @@ import com.core.spring.domain.order.OrderService;
 import com.core.spring.domain.order.OrderServiceImpl;
 import com.core.spring.domain.order.RateDiscountPolicy;
 
+@MyComponentScan(value =  "com.core")
 @MyConfiguration
 public class TestConfig {
 

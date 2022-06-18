@@ -1,8 +1,9 @@
 package com.core.spring;
 
+import com.core.spring.beans.BeanFactory;
+import com.core.spring.beans.CustomBean;
 import com.core.spring.beans.CustomContext;
-import com.core.spring.beans.Factory;
-import com.core.spring.domain.member.Member;
+import com.core.spring.beans.MyConfiguration;
 import com.core.spring.domain.member.MemberRepository;
 import com.core.spring.domain.member.MemberService;
 import com.core.spring.domain.member.MemberServiceImpl;
@@ -90,18 +91,19 @@ public class AllClassPrintTest {
 
     @Test
     void CoreTest() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Factory factory = new Factory(find("com.factory"));
-        assertTrue(factory.getCustomBean(TestConfig.class, "memberRepository") != null);
-        assertEquals(factory.getCustomBean(TestConfig.class, "memberRepository"), factory.getCustomBean(TestConfig.class, "memberRepository"));
-        assertEquals(factory.getCustomBean(TestConfig.class, "memberService"),
-                factory.getCustomBean(TestConfig.class, "memberService"));
-        assertEquals(((MemberServiceImpl) factory.getCustomBean(TestConfig.class, "memberService")).getMemberRepository(),
-                ((MemberServiceImpl) factory.getCustomBean(TestConfig.class, "memberService")).getMemberRepository());
+        BeanFactory beanFactory = new BeanFactory(find("com.core"));
+        CustomContext context =  beanFactory.getContext(TestConfig.class);
+        assertTrue(context.getBean( "memberRepository") != null);
+        assertEquals(context.getBean("memberRepository"), context.getBean( "memberRepository"));
+        assertEquals(context.getBean( "memberService"),
+                context.getBean("memberService"));
+        assertEquals(((MemberServiceImpl) context.getBean("memberService")).getMemberRepository(),
+                ((MemberServiceImpl) context.getBean("memberService")).getMemberRepository());
     }
 
     @Test
     void getContext() {
-        CustomContext context = new Factory(find("com.core")).getContext(TestConfig.class);
+        CustomContext context = new BeanFactory(find("com.core")).getContext(TestConfig.class);
 
         assertTrue(context != null);
         assertTrue(context.getBean("memberRepository") != null);
@@ -117,7 +119,7 @@ public class AllClassPrintTest {
      */
     @Test
     void parallelTest(){
-         new Factory(find("com.core")).getContext(TestConfig.class);
+         new BeanFactory(find("com.core")).getContext(TestConfig.class);
     }
 
 

@@ -2,7 +2,6 @@ package com.core.spring;
 
 import com.core.spring.domain.AppConfig;
 import com.core.spring.domain.member.Grade;
-import com.core.spring.domain.member.Member;
 import com.core.spring.domain.member.MemberRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
@@ -11,11 +10,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
@@ -47,15 +42,7 @@ public class BeanTest {
         System.out.println(method.getReturnType());
     }
 
-    @Test
-    void 받은_메서드_실행() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-        Class<?> object = Class.forName("com.core.spring.domain.AppConfig");
-        Method method = object.getMethod("memberRepository");
-        Object appConfig = object.newInstance();
 
-        MemberRepository repository = (MemberRepository) method.invoke(appConfig);
-        assertDoesNotThrow(() -> repository.save(new Member(1L, "hojun", Grade.BASIC)));
-    }
 
     @Test
     void 모든_클래스_순회() {

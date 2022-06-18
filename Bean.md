@@ -7,7 +7,7 @@
 ## 컨테이너 최대한 구현하기
 
 ```java
-        Class<?> object=Class.forName("com.factory.spring.domain.AppConfig");
+        Class<?> object=Class.forName("com.beanFactory.spring.domain.AppConfig");
         System.out.println("getName >> "+object.getName());
         System.out.println("getSimpleName >> "+object.getSimpleName());
         System.out.println("getPackageName >> "+object.getPackageName());
@@ -20,15 +20,15 @@
 * Class.forName 의 풀패키지경로를 입력해서 해당 클래스 인스턴스를 받아올 수 있다
 
 ```text
-getName >> com.factory.spring.domain.AppConfig
+getName >> com.beanFactory.spring.domain.AppConfig
 getSimpleName >> AppConfig
-getPackageName >> com.factory.spring.domain
+getPackageName >> com.beanFactory.spring.domain
 getSuperclass >> java.lang.Object
-getTypeName >> com.factory.spring.domain.AppConfig
-mehotd >> public com.factory.spring.SingletonProblem com.factory.spring.domain.AppConfig.singletonProblem()
-mehotd >> public com.factory.spring.domain.member.MemberRepository com.factory.spring.domain.AppConfig.memberRepository()
-mehotd >> public com.factory.spring.domain.member.MemberService com.factory.spring.domain.AppConfig.memberService()
-mehotd >> public com.factory.spring.domain.order.OrderService com.factory.spring.domain.AppConfig.orderService()
+getTypeName >> com.beanFactory.spring.domain.AppConfig
+mehotd >> public com.beanFactory.spring.SingletonProblem com.beanFactory.spring.domain.AppConfig.singletonProblem()
+mehotd >> public com.beanFactory.spring.domain.member.MemberRepository com.beanFactory.spring.domain.AppConfig.memberRepository()
+mehotd >> public com.beanFactory.spring.domain.member.MemberService com.beanFactory.spring.domain.AppConfig.memberService()
+mehotd >> public com.beanFactory.spring.domain.order.OrderService com.beanFactory.spring.domain.AppConfig.orderService()
 ```
 
 * Class에 존재하는 Method를 받아서 출력하자
@@ -36,7 +36,7 @@ mehotd >> public com.factory.spring.domain.order.OrderService com.factory.spring
 ```java
     @Test
     void 받은_메서드_invoke()throws ClassNotFoundException,NoSuchMethodException{
-            Class<?> object=Class.forName("com.factory.spring.domain.AppConfig");
+            Class<?> object=Class.forName("com.beanFactory.spring.domain.AppConfig");
         Method method=object.getMethod("memberRepository");
 
         System.out.println(method.getDeclaringClass());
@@ -47,10 +47,10 @@ mehotd >> public com.factory.spring.domain.order.OrderService com.factory.spring
 ```
 
 ```text
-class com.factory.spring.domain.AppConfig
+class com.beanFactory.spring.domain.AppConfig
 memberRepository
 [Ljava.lang.Class;@24ba9639  => 이 클래스 객체가 기본 유형 또는 void를 나타내는 경우 반환된다. 해당 메서드에는 반환형이 없음
-interface com.factory.spring.domain.member.MemberRepository
+interface com.beanFactory.spring.domain.member.MemberRepository
 ```
 
 * 실제 메서드 실행
@@ -58,7 +58,7 @@ interface com.factory.spring.domain.member.MemberRepository
 ```java
     @Test
     void 받은_메서드_실행()throws ClassNotFoundException,NoSuchMethodException,InvocationTargetException,IllegalAccessException,InstantiationException{
-            Class<?> object=Class.forName("com.factory.spring.domain.AppConfig");
+            Class<?> object=Class.forName("com.beanFactory.spring.domain.AppConfig");
         Method method=object.getMethod("memberRepository");
         Object appConfig=object.newInstance();
 
@@ -88,7 +88,7 @@ class ClassesLoader {
 
     private static final String BAD_PACKAGE_ERROR = "Unable to get resources from path '%s'. Are you sure the package '%s' exists?";
 
-    //루트 패키지 경로인 "com.factory"를 넣어준다
+    //루트 패키지 경로인 "com.beanFactory"를 넣어준다
     public static List<Class<?>> find(String scannedPackage) {
         String scannedPath = scannedPackage.replace(PKG_SEPARATOR, DIR_SEPARATOR);
         //현재 스레드에서 resource를 읽어온다. 
@@ -134,7 +134,7 @@ class ClassesLoader {
 ```java
 @Test
     void 어노테이션에_해당하는_함수들을_모두_호출한다(){
-            List<Class<?>>classes=find("com.factory");
+            List<Class<?>>classes=find("com.beanFactory");
         List<Object> result=new ArrayList<>();
 
         classes.stream().forEach(aClass->{
@@ -161,7 +161,7 @@ class ClassesLoader {
 ```java
     @Test
     void runMyContainer(){
-            InstanceContainer container=new InstanceContainer(Core.makeInstance(AllClassesLoader.find("com.factory")));
+            InstanceContainer container=new InstanceContainer(Core.makeInstance(AllClassesLoader.find("com.beanFactory")));
 
             assertThrows(NoSuchBeanDefinitionException.class,
         ()->container.getInstance("NOT_EXIST_METHOD"));
@@ -179,7 +179,7 @@ class ClassesLoader {
 ```java
  @Test
     void cglib() {
-        InstanceContainer container = new InstanceContainer(Core.makeInstance(find("com.factory")));
+        InstanceContainer container = new InstanceContainer(Core.makeInstance(find("com.beanFactory")));
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(TestConfig.class);
         enhancer.setCallback(new MethodInterceptor() {

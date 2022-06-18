@@ -1,5 +1,8 @@
 package com.core.spring.domain.member;
 
+import com.core.spring.beans.MyComponent;
+
+@MyComponent
 public class Member {
 
     private Long id;

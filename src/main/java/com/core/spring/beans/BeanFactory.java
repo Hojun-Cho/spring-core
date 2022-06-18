@@ -1,24 +1,20 @@
 package com.core.spring.beans;
 
-import com.core.spring.MyConfiguration;
-
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Factory {
+public class BeanFactory implements Factory {
     private final Map<String, Object> cglibClass = new ConcurrentHashMap<>();
     private final Map<String, Object> containers = new ConcurrentHashMap<>();
     private final Map<String, Class> original = new HashMap<>();
     private final Map<String, Method> methods = new ConcurrentHashMap<>();
-
-    public Factory(List<Class<?>> classes) {
+    public BeanFactory(List<Class<?>> classes) {
         classes.stream().parallel()
-                .filter(aClass -> aClass.getDeclaredAnnotationsByType(MyConfiguration.class).length != 0)
+                .filter(aClass -> aClass.getDeclaredAnnotation(MyConfiguration.class) != null)
                 .forEach(nowClass -> {
                     original.put(nowClass.getSimpleName(), nowClass);
                     Enhancer enhancer = new Enhancer();
@@ -43,9 +39,10 @@ public class Factory {
         return new CustomContext(cglibClass.get(targetClass.getSimpleName()),Collections.unmodifiableMap(contextMethodMap));
     }
 
-    public void init() {
+    private void init() {
         original.keySet()
                 .forEach(key -> Arrays.stream(original.get(key).getDeclaredMethods())
+                        .filter(method -> method.getDeclaredAnnotationsByType(CustomBean.class).length != 0)
                         .parallel()
                         .forEach(method ->
                                 methods.put(method.getName(), getMethodDontCareOrder(key, method.getName()))
@@ -60,10 +57,5 @@ public class Factory {
         result.setAccessible(true);
         return result;
     }
-
-    public Object getCustomBean(Class declareClass, String methodName) throws InvocationTargetException, IllegalAccessException {
-        return methods.get(methodName).invoke(cglibClass.get(declareClass.getSimpleName()));
-    }
-
 }
 

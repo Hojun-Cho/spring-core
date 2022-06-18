@@ -1,6 +1,8 @@
 package com.core.spring;
 
-@MyConfiguration
+import com.core.spring.beans.MyComponent;
+import com.core.spring.beans.MyConfiguration;
+
 public class SingletonProblem {
     private  int  price;
 
