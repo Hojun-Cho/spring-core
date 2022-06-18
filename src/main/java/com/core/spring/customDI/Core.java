@@ -11,17 +11,16 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Core {
-    private  Map<String, Object> cglibClasses = new ConcurrentHashMap<>();
-    private  Map<String, Object> enhancers = new ConcurrentHashMap<>();
-    private  Map<String, Class> original = new HashMap<>();
-    private  Map<String, Method> methods = new ConcurrentHashMap<>();
+    private final  Map<String, Object> cglibClasses = new ConcurrentHashMap<>();
+    private final Map<String, Object> enhancers = new ConcurrentHashMap<>();
+    private final Map<String, Class> original = new HashMap<>();
+    private final Map<String, Method> methods = new ConcurrentHashMap<>();
 
     public Core(List<Class<?>> classes) {
         classes.stream().parallel()
                 .filter(aClass -> aClass.getDeclaredAnnotationsByType(MyConfiguration.class).length != 0)
                 .forEach(nowClass -> {
                     original.put(nowClass.getSimpleName(), nowClass);
-                    System.out.println(nowClass.getSimpleName() + "  confirm");
                     Enhancer enhancer = new Enhancer();
                     enhancer.setSuperclass(nowClass);
                     enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
@@ -41,8 +40,8 @@ public class Core {
                         ));
     }
 
+
     private Method getEnhancerMethod(String key, String targetMethod) {
-        System.out.println(key + "============" + targetMethod);
          Method result= Arrays.stream(cglibClasses.get(key).getClass().getDeclaredMethods())
                 .parallel()
                 .filter(method -> method.getName().contains(targetMethod) && method.getName().length() == targetMethod.length())
