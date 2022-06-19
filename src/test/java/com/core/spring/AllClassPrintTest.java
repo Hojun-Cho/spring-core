@@ -1,9 +1,6 @@
 package com.core.spring;
 
-import com.core.spring.beans.BeanFactory;
-import com.core.spring.beans.CustomBean;
-import com.core.spring.beans.BeanContext;
-import com.core.spring.beans.MyConfiguration;
+import com.core.spring.beans.*;
 import com.core.spring.domain.member.MemberRepository;
 import com.core.spring.domain.member.MemberService;
 import com.core.spring.domain.member.MemberServiceImpl;
@@ -92,10 +89,10 @@ public class AllClassPrintTest {
     @Test
     void CoreTest() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         BeanFactory beanFactory = new BeanFactory(find("com.core"));
-        BeanContext context =  beanFactory.getContext(TestConfig.class);
-        assertTrue(context.getBean( "memberRepository") != null);
-        assertEquals(context.getBean("memberRepository"), context.getBean( "memberRepository"));
-        assertEquals(context.getBean( "memberService"),
+        BeanContext context = (BeanContext) beanFactory.getContext(TestConfig.class);
+        assertTrue(context.getBean("memberRepository") != null);
+        assertEquals(context.getBean("memberRepository"), context.getBean("memberRepository"));
+        assertEquals(context.getBean("memberService"),
                 context.getBean("memberService"));
         assertEquals(((MemberServiceImpl) context.getBean("memberService")).getMemberRepository(),
                 ((MemberServiceImpl) context.getBean("memberService")).getMemberRepository());
@@ -103,26 +100,34 @@ public class AllClassPrintTest {
 
     @Test
     void getContext() {
-        BeanContext context = new BeanFactory(find("com.core")).getContext(TestConfig.class);
+        BeanContext context = (BeanContext) new BeanFactory(find("com.core")).getContext(TestConfig.class);
 
         assertTrue(context != null);
         assertTrue(context.getBean("memberRepository") != null);
         assertSame(context.getBean("memberRepository"), context.getBean("memberRepository"));
         assertSame(context.getBean("memberService"), context.getBean("memberService"));
-        assertSame(((MemberService)context.getBean("memberService")).getMemberRepository(),
-                ((MemberRepository)((MemberService) context.getBean("memberService")).getMemberRepository()));
+        assertSame(((MemberService) context.getBean("memberService")).getMemberRepository(),
+                ((MemberRepository) ((MemberService) context.getBean("memberService")).getMemberRepository()));
     }
+
     /*
         use parallel in forEach Methods
         none parallel  239 ms
         parallel 238   ms
      */
     @Test
-    void parallelTest(){
-         new BeanFactory(find("com.core")).getContext(TestConfig.class);
+    void parallelTest() {
+        new BeanFactory(find("com.core")).getContext(TestConfig.class);
     }
 
+    @Test
+    void findAutowiredConstructor() {
+        ComponentContext context = (ComponentContext) new ComponentFactory().
+                getContext(TestConfig.class);
+        assertTrue(context != null);
+        context.findAutowiredConstructor();
 
+    }
 }
 
 

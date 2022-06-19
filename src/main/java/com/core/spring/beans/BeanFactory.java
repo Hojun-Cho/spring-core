@@ -29,7 +29,7 @@ public class BeanFactory implements Factory {
         init();
     }
 
-    public BeanContext getContext(Class<?> targetClass) {
+    public Context getContext(Class<?> targetClass) {
         Map<String,Method> contextMethodMap = new HashMap<>();
         Arrays.stream(original.get(targetClass.getSimpleName())
                         .getDeclaredMethods())

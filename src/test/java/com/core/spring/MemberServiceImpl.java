@@ -1,10 +1,14 @@
-package com.core.spring.domain.member;
+package com.core.spring;
 
 import com.core.spring.beans.MyAutowired;
 import com.core.spring.beans.MyComponent;
 
-public class MemberServiceImpl implements  MemberService{
-    private final MemberRepository memberRepository;
+@MyComponent
+public class MemberServiceImpl implements MemberService {
+    private  MemberRepository memberRepository;
+
+    public MemberServiceImpl() {
+    }
 
     @MyAutowired
     public MemberServiceImpl(MemberRepository memberRepository) {

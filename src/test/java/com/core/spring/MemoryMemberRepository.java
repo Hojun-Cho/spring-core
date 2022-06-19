@@ -1,10 +1,8 @@
-package com.core.spring.domain.member;
+package com.core.spring;
 
 import com.core.spring.beans.MyComponent;
 
-import java.util.HashMap;
-import java.util.Map;
-
+@MyComponent
 public class MemoryMemberRepository implements MemberRepository {
 
 }

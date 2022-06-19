@@ -15,7 +15,7 @@ import static com.core.spring.classLoader.Loader.find;
 public class ComponentFactory implements Factory {
     public static final String PATTERN = "**";
     private  final List<String> packageNames = new ArrayList<>();
-    private final Map<String, Object> packageToComponentClasses = new ConcurrentHashMap<>();
+    private final Map<String, Class> packageToComponentClasses = new ConcurrentHashMap<>();
     private final Map<String, Object> containers = new ConcurrentHashMap<>();
     private final Map<String, Object> cglibClass = new ConcurrentHashMap<>();
 
@@ -27,13 +27,14 @@ public class ComponentFactory implements Factory {
                                 !name.contains(aClass.getDeclaredAnnotation(MyComponentScan.class).value())))
                 .parallel()
                 .forEach(aClass -> {
+                    System.out.println(aClass.getSimpleName());
                     String packageName = aClass.getDeclaredAnnotation(MyComponentScan.class).value();
                     packageNames.add(packageName);
                     find(packageName)
                             .stream()
                             .filter(nowClass -> nowClass.getDeclaredAnnotation(MyComponent.class) != null)
                             .forEach(nowClass -> {
-                                packageToComponentClasses.put(aClass.getSimpleName().concat(PATTERN + nowClass.getSimpleName()), nowClass);
+                                packageToComponentClasses.put(aClass.getSimpleName().concat(PATTERN + nowClass.getSimpleName()),nowClass);
 
                                 Enhancer enhancer = new Enhancer();
                                 enhancer.setSuperclass(nowClass);
@@ -49,9 +50,9 @@ public class ComponentFactory implements Factory {
 
 
     @Override
-    public BeanContext getContext(Class<?> targetClass) {
+    public Context getContext(Class<?> targetClass) {
         Map<String, Object> cglibObject = new HashMap<>();
-        Map<String, Object> originalClass = new HashMap<>();
+        Map<String, Class> originalClass = new HashMap<>();
         packageToComponentClasses.keySet()
                 .parallelStream()
                 .filter(key -> key.startsWith(targetClass.getSimpleName() + PATTERN))
@@ -60,6 +61,6 @@ public class ComponentFactory implements Factory {
                     cglibObject.put(key, cglibClass.get(key));
                     originalClass.put(key, packageToComponentClasses.get(targetClass.getSimpleName() + PATTERN + key));
                 });
-        return null;
+        return new ComponentContext(cglibObject,originalClass);
     }
 }

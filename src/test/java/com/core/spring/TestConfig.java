@@ -1,6 +1,7 @@
 package com.core.spring;
 
 import com.core.spring.beans.CustomBean;
+import com.core.spring.beans.MyComponent;
 import com.core.spring.beans.MyComponentScan;
 import com.core.spring.beans.MyConfiguration;
 import com.core.spring.domain.member.MemberRepository;

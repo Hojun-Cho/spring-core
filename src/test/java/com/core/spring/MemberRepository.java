@@ -1,4 +1,4 @@
-package com.core.spring.domain.member;
+package com.core.spring;
 
 
 public interface MemberRepository {
