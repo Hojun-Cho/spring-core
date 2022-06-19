@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BeanFactory implements Factory {
+public class BeanFactory {
     private final Map<String, Object> cglibClass = new ConcurrentHashMap<>();
     private final Map<String, Object> containers = new ConcurrentHashMap<>();
     private final Map<String, Class> original = new HashMap<>();
@@ -29,7 +29,7 @@ public class BeanFactory implements Factory {
         init();
     }
 
-    public Context getContext(Class<?> targetClass) {
+    public BeanContext getContext(Class<?> targetClass) {
         Map<String,Method> contextMethodMap = new HashMap<>();
         Arrays.stream(original.get(targetClass.getSimpleName())
                         .getDeclaredMethods())

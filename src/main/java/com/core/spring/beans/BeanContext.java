@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-public class BeanContext implements Context {
+public class BeanContext {
 
     private final Map<String, Method> methodMap;
     private final Object clazz;

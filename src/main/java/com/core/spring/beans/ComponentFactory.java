@@ -3,6 +3,7 @@ package com.core.spring.beans;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
 
 import static com.core.spring.classLoader.Loader.find;
 
-public class ComponentFactory implements Factory {
+public class ComponentFactory  {
     public static final String PATTERN = "**";
     private final List<String> packageNames = new ArrayList<>();
     private final Map<String, Class> packageToComponentClasses = new ConcurrentHashMap<>();
@@ -21,7 +22,6 @@ public class ComponentFactory implements Factory {
     private final Map<String, Object> cglibClass = new ConcurrentHashMap<>();
     private final Map<String, Constructor> autowiredConstructors = new ConcurrentHashMap<>();
     private final Map<String, Class> originalClass = new HashMap<>();
-
     public ComponentFactory() {
         Map<String, Enhancer> tempEnhancer = new ConcurrentHashMap<>();
         find("com.core")
@@ -57,27 +57,24 @@ public class ComponentFactory implements Factory {
                     Enhancer enhancer = tempEnhancer.get(key);
                     Constructor constructor = autowiredConstructors.get(key);
                     List<Object> classes = Arrays.stream(constructor.getParameterTypes())
-                            .map(type -> {
-                                return cglibClass.get(type.getSimpleName());
-                            })
+                            .map(type -> cglibClass.get(type.getSimpleName()))
                             .collect(Collectors.toList());
-                    cglibClass.put(key, enhancer.create(constructor.getParameterTypes(), classes.toArray()));
+                    cglibClass.put(constructor.getDeclaringClass().getSimpleName() , enhancer.create(constructor.getParameterTypes(), classes.toArray()));
                 });
-
-
     }
 
-    @Override
-    public Context getContext(Class<?> targetClass) {
-        Map<String, Object> cglibObject = new HashMap<>();
+
+    public ComponentContext getContext(Class<?> targetClass) {
+        Map<Class, Object> cglibObject = new HashMap<>();
         Map<String, Class> originalClass = new HashMap<>();
         packageToComponentClasses.keySet()
                 .parallelStream()
                 .filter(key -> key.startsWith(targetClass.getSimpleName() + PATTERN))
                 .map(key -> key.split("\\*\\*")[1])
                 .forEach(key -> {
-                    cglibObject.put(key, cglibClass.get(key));
-                    originalClass.put(key, packageToComponentClasses.get(targetClass.getSimpleName() + PATTERN + key));
+                    Class now = packageToComponentClasses.get(targetClass.getSimpleName() + PATTERN + key);
+                    cglibObject.put(now, cglibClass.get(key));
+                    originalClass.put(key, now);
                 });
         return new ComponentContext(cglibObject, originalClass);
     }
@@ -91,5 +88,7 @@ public class ComponentFactory implements Factory {
 
         }
     }
+
+
 
 }

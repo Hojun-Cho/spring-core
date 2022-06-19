@@ -126,11 +126,14 @@ public class AllClassPrintTest {
                 getContext(TestConfig.class);
         assertTrue(context != null);
 
-        context.ifCallAutowiredInstance("MemberServiceImpl");
+
     }
     @Test
-    void factory에서_식별하기(){
-        new ComponentFactory();
+    void factory에서_식별하기() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        ComponentContext context = new ComponentFactory().
+                getContext(TestConfig.class);
+     MemberRepository memberRepository = (MemberRepository) context.getBean(MemberRepository.class);
+     assertTrue(memberRepository != null);
     }
 }
 
