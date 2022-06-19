@@ -125,8 +125,12 @@ public class AllClassPrintTest {
         ComponentContext context = (ComponentContext) new ComponentFactory().
                 getContext(TestConfig.class);
         assertTrue(context != null);
-        context.findAutowiredConstructor();
 
+        context.ifCallAutowiredInstance("MemberServiceImpl");
+    }
+    @Test
+    void factory에서_식별하기(){
+        new ComponentFactory();
     }
 }
 

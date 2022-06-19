@@ -4,37 +4,41 @@ package com.core.spring.beans;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.core.spring.classLoader.Loader.find;
 
 public class ComponentFactory implements Factory {
     public static final String PATTERN = "**";
-    private  final List<String> packageNames = new ArrayList<>();
+    private final List<String> packageNames = new ArrayList<>();
     private final Map<String, Class> packageToComponentClasses = new ConcurrentHashMap<>();
     private final Map<String, Object> containers = new ConcurrentHashMap<>();
     private final Map<String, Object> cglibClass = new ConcurrentHashMap<>();
+    private final Map<String, Constructor> autowiredConstructors = new ConcurrentHashMap<>();
+    private final Map<String, Class> originalClass = new HashMap<>();
 
     public ComponentFactory() {
+        Map<String, Enhancer> tempEnhancer = new ConcurrentHashMap<>();
         find("com.core")
                 .stream()
                 .filter(aClass -> aClass.getDeclaredAnnotation(MyComponentScan.class) != null &&
-                        packageNames.stream().allMatch(name->
+                        packageNames.stream().allMatch(name ->
                                 !name.contains(aClass.getDeclaredAnnotation(MyComponentScan.class).value())))
-                .parallel()
                 .forEach(aClass -> {
-                    System.out.println(aClass.getSimpleName());
                     String packageName = aClass.getDeclaredAnnotation(MyComponentScan.class).value();
                     packageNames.add(packageName);
                     find(packageName)
                             .stream()
                             .filter(nowClass -> nowClass.getDeclaredAnnotation(MyComponent.class) != null)
                             .forEach(nowClass -> {
-                                packageToComponentClasses.put(aClass.getSimpleName().concat(PATTERN + nowClass.getSimpleName()),nowClass);
+                                findAutowiredConstructor(nowClass);
+                                packageToComponentClasses.put(aClass.getSimpleName().concat(PATTERN + nowClass.getSimpleName()), nowClass);
+                                originalClass.put(nowClass.getSimpleName(), nowClass);
 
                                 Enhancer enhancer = new Enhancer();
                                 enhancer.setSuperclass(nowClass);
@@ -44,10 +48,24 @@ public class ComponentFactory implements Factory {
                                     return containers.get(method.getName());
                                 });
                                 cglibClass.put(nowClass.getSimpleName(), enhancer.create());
+
+                                tempEnhancer.put(nowClass.getSimpleName(), enhancer);
                             });
                 });
-    }
+        autowiredConstructors.keySet().stream()
+                .forEach(key -> {
+                    Enhancer enhancer = tempEnhancer.get(key);
+                    Constructor constructor = autowiredConstructors.get(key);
+                    List<Object> classes = Arrays.stream(constructor.getParameterTypes())
+                            .map(type -> {
+                                return cglibClass.get(type.getSimpleName());
+                            })
+                            .collect(Collectors.toList());
+                    cglibClass.put(key, enhancer.create(constructor.getParameterTypes(), classes.toArray()));
+                });
 
+
+    }
 
     @Override
     public Context getContext(Class<?> targetClass) {
@@ -61,6 +79,17 @@ public class ComponentFactory implements Factory {
                     cglibObject.put(key, cglibClass.get(key));
                     originalClass.put(key, packageToComponentClasses.get(targetClass.getSimpleName() + PATTERN + key));
                 });
-        return new ComponentContext(cglibObject,originalClass);
+        return new ComponentContext(cglibObject, originalClass);
     }
+
+    public void findAutowiredConstructor(Class nowClass) {
+        Optional<Constructor> result = Arrays.stream(nowClass.getDeclaredConstructors())
+                .filter(constructor -> constructor.getDeclaredAnnotation(MyAutowired.class) != null)
+                .findFirst();
+        if (result.isPresent()) {
+            autowiredConstructors.put(result.get().getDeclaringClass().getSimpleName(), result.get());
+
+        }
+    }
+
 }
